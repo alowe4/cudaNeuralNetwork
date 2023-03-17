@@ -1,4 +1,4 @@
-__global__ void forwardFeed(float* inputLayer, float* hiddenWeights, float* hiddenLayer, float* outputLayer, float* outputWeights, float* outputLayerBias, float* hiddenLayerBias, int numHiddenNodes, int numInputs, int numOutputs, int trainingSetIndex);
+__global__ void forwardFeed(double* inputLayer, double* hiddenWeights, double* hiddenLayer, double* outputLayer, double* outputWeights, double* outputLayerBias, double* hiddenLayerBias, int numHiddenNodes, int numInputs, int numOutputs, int trainingSetIndex);
 
 
-__global__ void backpropogate(float* trainingInputs, float* hiddenLayer, float* hiddenWeights, float* outputLayer, float* outputWeights, float* trainingOutputs, float* hiddenLayerBias, float* outputLayerBias, int numHiddenNodes, int numInputs, int numOutputs, int trainingSetIndex, float lr);
+__global__ void backpropogate(double* trainingInputs, double* hiddenLayer, double* hiddenWeights, double* outputLayer, double* outputWeights, double* trainingOutputs, double* hiddenLayerBias, double* outputLayerBias, int numHiddenNodes, int numInputs, int numOutputs, int trainingSetIndex, double lr);
