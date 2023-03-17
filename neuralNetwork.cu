@@ -1,4 +1,3 @@
-// What will the neural network do? 
 #include <stdio.h>
 
 __device__ double sigmoid(double x){
@@ -11,17 +10,13 @@ __device__ double dSigmoid(double x){
 }
 
 
-
 __global__ void forwardFeed(double* inputLayer, double* hiddenWeights, double* hiddenLayer, double* outputLayer, double* outputWeights, double* outputLayerBias, double* hiddenLayerBias, int numHiddenNodes, int numInputs, int numOutputs, int trainingSetIndex){
 	int i = trainingSetIndex; 
 	for(int j = 0 ; j < numHiddenNodes; j++){
-
 		double activation = hiddenLayerBias[j];
 		for(int k = 0; k < numInputs; k++){
 			activation += inputLayer[(i * numInputs) + k] * hiddenWeights[(k * numInputs) + j];
-//			printf("%f += %f * %f\n", activation, inputLayer[i * numInputs + k], hiddenWeights[(k * numInputs + j)]);
 		}
-//		printf("\n\n");
 		hiddenLayer[j] = sigmoid(activation);
 	}
 
@@ -42,21 +37,15 @@ __global__ void forwardFeed(double* inputLayer, double* hiddenWeights, double* h
 // Training Outputs Checks If Our Values Are Correct
 __global__ void backpropogate(double* trainingInputs, double* hiddenLayer, double* hiddenWeights, double* outputLayer, double* outputWeights, double* trainingOutputs, double* hiddenLayerBias, double* outputLayerBias, int numHiddenNodes, int numInputs, int numOutputs, int trainingSetIndex, double lr){
 
-
-	// Made & Used in Backpropoagate
 	int i = trainingSetIndex; 
 
 	double deltaOutput[1];
 
-	//printf("Training Outputs: ");
 	// Calcualte Mean Squared Error In Output Weights
 	for(int j = 0; j < numOutputs; j++){
-
-	//	printf("%f ", trainingOutputs[i * numOutputs + j]);
 		double dError = (trainingOutputs[i * numOutputs + j] - outputLayer[j]);
 		deltaOutput[j] = dError * dSigmoid(outputLayer[j]);
 	}
-	//printf("\nOutput Layer: %f\n", outputLayer[0]);
 
 
 	double deltaHidden[4];
@@ -74,7 +63,6 @@ __global__ void backpropogate(double* trainingInputs, double* hiddenLayer, doubl
 		outputLayerBias[j] += deltaOutput[j] * lr;
 		for(int k = 0; k < numHiddenNodes; k++){
 			outputWeights[(k * numOutputs) + j] += hiddenLayer[k] * deltaOutput[j] * lr;
-	//		printf("%f += %f * %f * %f\n", outputWeights[(k*numOutputs)+j], hiddenLayer[k], deltaOutput[j], lr); 
 		}
 	}
 
@@ -83,16 +71,8 @@ __global__ void backpropogate(double* trainingInputs, double* hiddenLayer, doubl
 		hiddenLayerBias[j] += deltaHidden[j] * lr; 
 		for(int k = 0; k < numInputs; k++){
 			hiddenWeights[(k * numOutputs) + j] += trainingInputs[(i * numInputs) + k] * deltaHidden[j] * lr; 
-
 		}
 	}
 
 }
 
-
-
-// Sigmoid function
-
-// Forward Feeding Function
-
-// Backpropogation Function
