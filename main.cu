@@ -21,7 +21,6 @@ void shuffle(int* array, size_t n){
 			array[i] = t;
 		}
 	}
-
 }
 
 
@@ -46,7 +45,8 @@ int main(int argc, char** argv){
 	double training_inputs[8] = {0.0f,0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
 	double training_outputs[4] = {0.0f, 1.0f, 1.0f, 0.0f};
 	int trainingSetOrder[] = {0,1,2,3};
-
+	int numTrainingSets = 4; 
+	
 	// Initialize all the arrays into memory
 	double* hiddenLayer = (double*) malloc(numHiddenNodes * sizeof(double));
 	double* outputLayer = (double*) malloc(numOutputs * sizeof(double));
@@ -96,7 +96,7 @@ int main(int argc, char** argv){
 	}
 
 
-	int numTrainingSets = 4; 
+	
 	cudaMemcpy(cuHiddenLayer, hiddenLayer, numHiddenNodes * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(cuOutputLayer, outputLayer, numOutputs * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(cuHiddenLayerBias, hiddenLayerBias, numHiddenNodes * sizeof(double), cudaMemcpyHostToDevice);
@@ -109,11 +109,8 @@ int main(int argc, char** argv){
 
 
 
-
-
-
-
-
+//------------------------------------------------------------------------------
+//do epochs
 
 	for(int n = 0; n < epochs; n++){
 		
@@ -121,14 +118,13 @@ int main(int argc, char** argv){
 		
 		for(int x = 0; x < numTrainingSets; x++){
 			int i = trainingSetOrder[x]; 
-			//printf("%d\n", n);
 			forwardFeed<<<1, 1>>>(cuTrainingInputs, cuHiddenWeights, cuHiddenLayer, cuOutputLayer, cuOutputWeights, cuOutputLayerBias, cuHiddenLayerBias, numHiddenNodes, numInputs, numOutputs, i);	
 			cudaDeviceSynchronize(); 
 
 			backpropogate<<<1, 1>>>(cuTrainingInputs, cuHiddenLayer, cuHiddenWeights, cuOutputLayer, cuOutputWeights, cuTrainingOutputs, cuHiddenLayerBias, cuOutputLayerBias, numHiddenNodes, numInputs, numOutputs, i, lr);	
 
 			cudaDeviceSynchronize();
-			// Predict Function
+			
 				
 		}
 
@@ -136,10 +132,7 @@ int main(int argc, char** argv){
 	
 	}
 	
-	
-	//  Transfer memory off of GPU to CPU 
-	// To run predict we have to:
-       	// Specify user inputs	
+	// Predict Function
 
        // Create two pieces of test input
        double test_input[2] ={atof(argv[1]), atof(argv[2])}; 
@@ -154,12 +147,8 @@ int main(int argc, char** argv){
        cudaDeviceSynchronize();
 
        // Transfer the memory off of the GPU to the CPU 
-       //outputLayer[0] = 15.00f;
        cudaMemcpy(outputLayer, cuOutputLayer, numOutputs * sizeof(double), cudaMemcpyDeviceToHost);
 
-       // Run the forward feed function given the Hidden Weights
-
-       // Then we output 
 
        printf("%f\n", outputLayer[0]);	
 
