@@ -15,7 +15,7 @@ __global__ void forwardFeed(double* inputLayer, double* hiddenWeights, double* h
 	for(int j = 0 ; j < numHiddenNodes; j++){
 		double activation = hiddenLayerBias[j];
 		for(int k = 0; k < numInputs; k++){
-			activation += inputLayer[(i * numInputs) + k] * hiddenWeights[(k * numInputs) + j];
+			activation += inputLayer[(i * numInputs) + k] * hiddenWeights[(j * numInputs) + k];
 		}
 		hiddenLayer[j] = sigmoid(activation);
 	}
