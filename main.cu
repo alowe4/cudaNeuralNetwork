@@ -36,7 +36,7 @@ int main(int argc, char** argv){
  	srand((unsigned)time(&t));
 	// Set the learning rate & epochs
 	int epochs = 10000;
-	double lr = 1.0f;
+	double lr = 1.00f;
 
 	int numInputs = 2;
 	int numHiddenNodes = 4;
@@ -107,8 +107,39 @@ int main(int argc, char** argv){
 	cudaMemcpy(cuTrainingSetOrder, trainingSetOrder, 4 * sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(cuOutputWeights, outputWeights, numHiddenNodes * sizeof(double), cudaMemcpyHostToDevice);
 
+/*
+double* a = (double*) malloc(2 * sizeof(double));
+double* b = (double*) malloc(4 * sizeof(double));
+double* ab = (double*) malloc(4 * sizeof(double));
 
+a[0] = 1; 
+a[1] = 2; 
+b[0] = 3; 
+b[1] = 2;
+b[2] = 1;
+b[3] = 0;
 
+double* cua;
+double* cub;
+double* cuab;
+
+cudaMalloc((void**)&cua, 2 * sizeof(double));
+cudaMalloc((void**)&cub, 4 * sizeof(double));
+cudaMalloc((void**)&cuab, 4 * sizeof(double));
+
+cudaMemcpy(cua, a, 2 * sizeof(double), cudaMemcpyHostToDevice);
+cudaMemcpy(cub, b, 4 * sizeof(double), cudaMemcpyHostToDevice);
+cudaMemcpy(cuab, ab, 4 * sizeof(double), cudaMemcpyHostToDevice);
+
+matrix_multiply_simple<<<1,4>>>(cua,cub,cuab,2);
+cudaDeviceSynchronize();
+
+cudaMemcpy(ab, cuab, 4 * sizeof(double), cudaMemcpyDeviceToHost);
+
+for(int i=0; i<2; i++){
+	printf("val[%i]: %f\n", i, ab[i]);
+}
+*/
 //------------------------------------------------------------------------------
 //do epochs
 
@@ -118,7 +149,7 @@ int main(int argc, char** argv){
 		
 		for(int x = 0; x < numTrainingSets; x++){
 			int i = trainingSetOrder[x]; 
-			forwardFeed<<<1, 1>>>(cuTrainingInputs, cuHiddenWeights, cuHiddenLayer, cuOutputLayer, cuOutputWeights, cuOutputLayerBias, cuHiddenLayerBias, numHiddenNodes, numInputs, numOutputs, i);	
+			forwardFeed<<<1, 4>>>(cuTrainingInputs, cuHiddenWeights, cuHiddenLayer, cuOutputLayer, cuOutputWeights, cuOutputLayerBias, cuHiddenLayerBias, numHiddenNodes, numInputs, numOutputs, i);	
 			cudaDeviceSynchronize(); 
 
 			backpropogate<<<1, 1>>>(cuTrainingInputs, cuHiddenLayer, cuHiddenWeights, cuOutputLayer, cuOutputWeights, cuTrainingOutputs, cuHiddenLayerBias, cuOutputLayerBias, numHiddenNodes, numInputs, numOutputs, i, lr);	
