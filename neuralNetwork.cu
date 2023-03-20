@@ -10,25 +10,24 @@ __device__ double dSigmoid(double x){
 }
 
 
-__device__ void matrix_multiply_simple(double *a, double *b, double *ab, size_t width)
+__device__ void matrix_multiply_simple(double *a, double *b, double *ab, size_t axdim, size_t aydim, size_t bxdim, size_t bydim, size_t abxdim, size_t abydim)
 {
-	size_t n = width; 
-        // We take the thread id and the thread id will tell us what the current x & y is 
+	// We take the thread id and the thread id will tell us what the current x & y is 
 	int col  = blockIdx.x * blockDim.x + threadIdx.x; 
 	int row  = blockIdx.y * blockDim.y + threadIdx.y; 
 	
-	if((row < n) && (col < n)){
+	if((row < abydim) && (col < abxdim)){
 		double pVal = 0; 
-		for(int k = 0; k < n; ++k){
+		for(int k = 0; k < axdim; ++k){
 			//printf("k: %i, a[k]: %d\n", k, a[k]);
-			pVal += a[k] * b[k * n + col]; 
+			pVal += a[k] * b[k * bxdim + col]; 
 		}
-		ab[row * n + col] = pVal; 
+		ab[row * abxdim + col] = pVal; 
 	}
 
 }
 
-__global__ void hiddenLayerCompletion(double* hiddenLayer, 
+//__global__ void hiddenLayerCompletion(double* hiddenLayer, 
 
 
 __global__ void forwardFeed(double* inputLayer, double* hiddenWeights, double* hiddenLayer, double* outputLayer, double* outputWeights, double* outputLayerBias, double* hiddenLayerBias, int numHiddenNodes, int numInputs, int numOutputs, int trainingSetIndex){
@@ -41,10 +40,12 @@ __global__ void forwardFeed(double* inputLayer, double* hiddenWeights, double* h
 		//multiply matrixes
 		double temp[2] = { inputLayer[i * numInputs], inputLayer[(i * numInputs) + 1] };
 		double temp2[4];
-		matrix_multiply_simple(temp, hiddenWeights,temp2,4); 
+		matrix_multiply_simple(temp, hiddenWeights,temp2,2,1,4,2,4,1); 
 		//sum result matrix
-		//need new var passed in to ff
+		
+		//return temp2, sum temp2, call sigmoid
 		for(int i =0; i<4;i++){
+			//printf("temp2[%i]: %f\n",i, temp2[i]);
 			activation += temp2[i];
 		}
 		hiddenLayer[j] = sigmoid(activation);

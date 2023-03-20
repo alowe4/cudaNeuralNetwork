@@ -107,39 +107,8 @@ int main(int argc, char** argv){
 	cudaMemcpy(cuTrainingSetOrder, trainingSetOrder, 4 * sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(cuOutputWeights, outputWeights, numHiddenNodes * sizeof(double), cudaMemcpyHostToDevice);
 
-/*
-double* a = (double*) malloc(2 * sizeof(double));
-double* b = (double*) malloc(4 * sizeof(double));
-double* ab = (double*) malloc(4 * sizeof(double));
 
-a[0] = 1; 
-a[1] = 2; 
-b[0] = 3; 
-b[1] = 2;
-b[2] = 1;
-b[3] = 0;
 
-double* cua;
-double* cub;
-double* cuab;
-
-cudaMalloc((void**)&cua, 2 * sizeof(double));
-cudaMalloc((void**)&cub, 4 * sizeof(double));
-cudaMalloc((void**)&cuab, 4 * sizeof(double));
-
-cudaMemcpy(cua, a, 2 * sizeof(double), cudaMemcpyHostToDevice);
-cudaMemcpy(cub, b, 4 * sizeof(double), cudaMemcpyHostToDevice);
-cudaMemcpy(cuab, ab, 4 * sizeof(double), cudaMemcpyHostToDevice);
-
-matrix_multiply_simple<<<1,4>>>(cua,cub,cuab,2);
-cudaDeviceSynchronize();
-
-cudaMemcpy(ab, cuab, 4 * sizeof(double), cudaMemcpyDeviceToHost);
-
-for(int i=0; i<2; i++){
-	printf("val[%i]: %f\n", i, ab[i]);
-}
-*/
 //------------------------------------------------------------------------------
 //do epochs
 
