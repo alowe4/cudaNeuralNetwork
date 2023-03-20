@@ -8,7 +8,7 @@
 
 #include "neuralNetwork.h"
 
-float init_weight(){ return ((float) rand())/ ((float)RAND_MAX);}
+double init_weight(){ return ((double) rand())/ ((double)RAND_MAX);}
 
 
 void shuffle(int* array, size_t n){
@@ -21,7 +21,6 @@ void shuffle(int* array, size_t n){
 			array[i] = t;
 		}
 	}
-
 }
 
 
@@ -37,58 +36,58 @@ int main(int argc, char** argv){
  	srand((unsigned)time(&t));
 	// Set the learning rate & epochs
 	int epochs = 10000;
-	float lr = 1.0f;
+	double lr = 1.0f;
 
 	int numInputs = 2;
 	int numHiddenNodes = 4;
 	int numOutputs = 1;
 
-	float training_inputs[8] = {0.0f,0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
-	float training_outputs[4] = {0.0f, 1.0f, 1.0f, 0.0f};
+	double training_inputs[8] = {0.0f,0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
+	double training_outputs[4] = {0.0f, 1.0f, 1.0f, 0.0f};
 	int trainingSetOrder[] = {0,1,2,3};
-	int numTrainingSets = 4;
-
-	// Initialize all the arrays into memory
-	float* hiddenLayer = (float*) malloc(numHiddenNodes * sizeof(float));
-	float* outputLayer = (float*) malloc(numOutputs * sizeof(float));
+	int numTrainingSets = 4; 
 	
-	float* hiddenLayerAct = (float*) malloc(numHiddenNodes * sizeof(float));
-	float* outputLayerAct = (float*) malloc(numOutputs * sizeof(float));
+	// Initialize all the arrays into memory
+	double* hiddenLayer = (double*) malloc(numHiddenNodes * sizeof(double));
+	double* outputLayer = (double*) malloc(numOutputs * sizeof(double));
+	
+	double* hiddenLayerAct = (double*) malloc(numHiddenNodes * sizeof(double));
+	double* outputLayerAct = (double*) malloc(numOutputs * sizeof(double));
 
-	float* hiddenLayerBias = (float*) malloc(numHiddenNodes * sizeof(float));
-	float* outputLayerBias = (float*) malloc(numOutputs * sizeof(float));
+	double* hiddenLayerBias = (double*) malloc(numHiddenNodes * sizeof(double));
+	double* outputLayerBias = (double*) malloc(numOutputs * sizeof(double));
 
-	float* hiddenWeights = (float*)malloc(numInputs * numHiddenNodes* sizeof(float));
-	float* outputWeights = (float*)malloc(numHiddenNodes * numOutputs * sizeof(float));
+	double* hiddenWeights = (double*)malloc(numInputs * numHiddenNodes* sizeof(double));
+	double* outputWeights = (double*)malloc(numHiddenNodes * numOutputs * sizeof(double));
 
 	//cuda
-	float* cuHiddenLayer;
-	float* cuOutputLayer;
+	double* cuHiddenLayer;
+	double* cuOutputLayer;
 	
-	float* cuHiddenLayerAct;
-	float* cuOutputLayerAct;
+	double* cuHiddenLayerAct;
+	double* cuOutputLayerAct;
 	
-	float* cuHiddenLayerBias;
-	float* cuOutputLayerBias;
-	float* cuOutputWeights;
-	float* cuHiddenWeights;
-	float* cuTrainingInputs;
-	float* cuTrainingOutputs;
+	double* cuHiddenLayerBias;
+	double* cuOutputLayerBias;
+	double* cuOutputWeights;
+	double* cuHiddenWeights;
+	double* cuTrainingInputs;
+	double* cuTrainingOutputs;
 	int* cuTrainingSetOrder;
 
-	cudaMalloc((void**)&cuHiddenLayer, numHiddenNodes * sizeof(float));
-	cudaMalloc((void**)&cuOutputLayer, numOutputs * sizeof(float));
-	
-	cudaMalloc((void**)&cuHiddenLayerAct, numHiddenNodes * sizeof(float));
-	cudaMalloc((void**)&cuOutputLayerAct, numOutputs * sizeof(float));
-	
-	cudaMalloc((void**)&cuHiddenLayerBias, numHiddenNodes * sizeof(float));
-	cudaMalloc((void**)&cuOutputLayerBias, numOutputs * sizeof(float));
-	cudaMalloc((void**)&cuHiddenWeights, numInputs * numHiddenNodes * sizeof(float));
-	cudaMalloc((void**)&cuTrainingInputs, 8 * sizeof(float));
-	cudaMalloc((void**)&cuTrainingOutputs, 4 * sizeof(float));
+	cudaMalloc((void**)&cuHiddenLayer, numHiddenNodes * sizeof(double));
+	cudaMalloc((void**)&cuOutputLayer, numOutputs * sizeof(double));
+
+	cudaMalloc((void**)&cuHiddenLayerAct, numHiddenNodes * sizeof(double));
+	cudaMalloc((void**)&cuOutputLayerAct, numOutputs * sizeof(double));
+
+	cudaMalloc((void**)&cuHiddenLayerBias, numHiddenNodes * sizeof(double));
+	cudaMalloc((void**)&cuOutputLayerBias, numOutputs * sizeof(double));
+	cudaMalloc((void**)&cuHiddenWeights, numInputs * numHiddenNodes * sizeof(double));
+	cudaMalloc((void**)&cuTrainingInputs, 8 * sizeof(double));
+	cudaMalloc((void**)&cuTrainingOutputs, 4 * sizeof(double));
 	cudaMalloc((void**)&cuTrainingSetOrder, 4 * sizeof(int));
-	cudaMalloc((void**)&cuOutputWeights, numHiddenNodes * numOutputs *  sizeof(float));
+	cudaMalloc((void**)&cuOutputWeights, numHiddenNodes * numOutputs *  sizeof(double));
 
 	// Initialize All The Weights
 	for(int i = 0; i < numInputs; i++){
@@ -108,68 +107,85 @@ int main(int argc, char** argv){
 	}
 
 
-	//cuda memory copy to device
-	cudaMemcpy(cuHiddenLayer, hiddenLayer, numHiddenNodes * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(cuOutputLayer, outputLayer, numOutputs * sizeof(float), cudaMemcpyHostToDevice);
 	
-	cudaMemcpy(cuHiddenLayerAct, hiddenLayerAct, numHiddenNodes * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(cuOutputLayerAct, outputLayerAct, numOutputs * sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(cuHiddenLayer, hiddenLayer, numHiddenNodes * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(cuOutputLayer, outputLayer, numOutputs * sizeof(double), cudaMemcpyHostToDevice);
 
-	
-	cudaMemcpy(cuHiddenLayerBias, hiddenLayerBias, numHiddenNodes * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(cuOutputLayerBias, outputLayerBias, numOutputs * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(cuHiddenWeights, hiddenWeights, numInputs * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(cuTrainingInputs, training_inputs, 8 * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(cuTrainingOutputs, training_outputs, 4 * sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(cuHiddenLayerAct, hiddenLayerAct, numHiddenNodes * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(cuOutputLayerAct, outputLayerAct, numOutputs * sizeof(double), cudaMemcpyHostToDevice);
+
+
+	cudaMemcpy(cuHiddenLayerBias, hiddenLayerBias, numHiddenNodes * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(cuOutputLayerBias, outputLayerBias, numOutputs * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(cuHiddenWeights, hiddenWeights, numInputs * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(cuTrainingInputs, training_inputs, 8 * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(cuTrainingOutputs, training_outputs, 4 * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(cuTrainingSetOrder, trainingSetOrder, 4 * sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(cuOutputWeights, outputWeights, numHiddenNodes * sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(cuOutputWeights, outputWeights, numHiddenNodes * sizeof(double), cudaMemcpyHostToDevice);
 
 
 
-//------------------------------------------------------------------------------------------------------------------
-//start epochs
+//------------------------------------------------------------------------------
+//do epochs
 
 	for(int n = 0; n < epochs; n++){
+		
 		shuffle(trainingSetOrder, numTrainingSets);
+		
 		for(int x = 0; x < numTrainingSets; x++){
-			int i = trainingSetOrder[x];
-			forwardFeedP1<<<1, 1>>>(cuTrainingInputs, cuHiddenWeights, cuHiddenLayer, cuOutputLayer, cuOutputWeights, cuOutputLayerBias, cuHiddenLayerBias, numHiddenNodes, numInputs, numOutputs, i, cuHiddenLayerAct);
+			int i = trainingSetOrder[x]; 
+			forwardFeedP1<<<1, 1>>>(cuTrainingInputs, cuHiddenWeights, cuHiddenLayer, cuOutputLayer, cuOutputWeights, cuOutputLayerBias, cuHiddenLayerBias, numHiddenNodes, numInputs, numOutputs, i, cuHiddenLayerAct);	
 			cudaDeviceSynchronize();
-
+			 
 			sigmoidActivationForward<<<1,4>>>(cuHiddenLayerAct,cuHiddenLayer,4,1);
 			cudaDeviceSynchronize();
-
+			
 			forwardFeedP2<<<1, 1>>>(cuTrainingInputs, cuHiddenWeights, cuHiddenLayer, cuOutputLayer, cuOutputWeights, cuOutputLayerBias, cuHiddenLayerBias, numHiddenNodes, numInputs, numOutputs, i, cuOutputLayerAct);
 			cudaDeviceSynchronize();
 			
 			sigmoidActivationForward<<<1,1>>>(cuOutputLayerAct,cuOutputLayer,1,1);
 			cudaDeviceSynchronize();
 
-			backpropogate<<<1, 1>>>(cuTrainingInputs, cuHiddenLayer, cuHiddenWeights, cuOutputLayer, cuOutputWeights, cuTrainingOutputs, cuHiddenLayerBias, cuOutputLayerBias, numHiddenNodes, numInputs, numOutputs, i, lr);
+			backpropogate<<<1, 1>>>(cuTrainingInputs, cuHiddenLayer, cuHiddenWeights, cuOutputLayer, cuOutputWeights, cuTrainingOutputs, cuHiddenLayerBias, cuOutputLayerBias, numHiddenNodes, numInputs, numOutputs, i, lr);	
+
 			cudaDeviceSynchronize();
+			
+				
 		}
+
+			
+	
 	}
 	
 	// Predict Function
 
-	// Create two pieces of test input
-	float test_input[2] ={atof(argv[1]), atof(argv[2])};
-	float* cuInputs;
-	cudaMalloc((void**)&cuInputs, 2 * sizeof(float));
-	cudaMemcpy(cuInputs, test_input, 2 * sizeof(float), cudaMemcpyHostToDevice);
-        
-        forwardFeedP1<<<1, 1>>>(cuInputs, cuHiddenWeights, cuHiddenLayer, cuOutputLayer, cuOutputWeights, cuOutputLayerBias, cuHiddenLayerBias, numHiddenNodes, numInputs, numOutputs, 0,cuHiddenLayerAct);
+       // Create two pieces of test input
+       double test_input[2] ={atof(argv[1]), atof(argv[2])}; 
+       
+       double* cuInputs; 
+       
+       cudaMalloc((void**)&cuInputs, 2 * sizeof(double));
+       
+       cudaMemcpy(cuInputs, test_input, 2 * sizeof(double), cudaMemcpyHostToDevice);
+       
+       forwardFeedP1<<<1, 1>>>(cuInputs, cuHiddenWeights, cuHiddenLayer, cuOutputLayer, cuOutputWeights, cuOutputLayerBias, cuHiddenLayerBias, numHiddenNodes, numInputs, numOutputs, 0,cuHiddenLayerAct);
+			cudaDeviceSynchronize();
+	
+	sigmoidActivationForward<<<1,4>>>(cuHiddenLayerAct,cuHiddenLayer,4,1);
 			cudaDeviceSynchronize();
 
 	forwardFeedP2<<<1, 1>>>(cuInputs, cuHiddenWeights, cuHiddenLayer, cuOutputLayer, cuOutputWeights, cuOutputLayerBias, cuHiddenLayerBias, numHiddenNodes, numInputs, numOutputs, 0,cuOutputLayerAct);
 			cudaDeviceSynchronize();
 			
+	sigmoidActivationForward<<<1,1>>>(cuOutputLayerAct,cuOutputLayer,1,1);
+			cudaDeviceSynchronize();
+
+       // Transfer the memory off of the GPU to the CPU 
+       cudaMemcpy(outputLayer, cuOutputLayer, numOutputs * sizeof(double), cudaMemcpyDeviceToHost);
 
 
-        // Transfer the memory off of the GPU to the CPU
-        cudaMemcpy(outputLayer, cuOutputLayer, numOutputs * sizeof(float), cudaMemcpyDeviceToHost);
+       printf("%f\n", outputLayer[0]);	
 
-        printf("%f\n", outputLayer[0]);
 
 }
 
